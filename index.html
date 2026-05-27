@@ -99,6 +99,26 @@ hr.div{border:none;border-top:1px solid var(--border);margin:14px 0}
 .confirm-box{background:var(--orangebg);border:1.5px solid var(--orange);border-radius:10px;padding:14px;margin-top:12px;display:none}
 .conf-msg{font-size:13px;color:var(--text);margin-bottom:10px;line-height:1.5}
 @media(max-width:500px){.form-row{grid-template-columns:1fr}}
+
+.help-chapter{margin-bottom:8px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.help-chapter-header{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg2);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.help-chapter-header:active{opacity:.7}
+.help-chapter-icon{font-size:20px;flex-shrink:0}
+.help-chapter-title{font-size:15px;font-weight:600;flex:1;color:var(--text)}
+.help-chapter-arrow{font-size:13px;color:var(--text2);transition:transform .2s;flex-shrink:0}
+.help-chapter-arrow.open{transform:rotate(180deg)}
+.help-chapter-body{display:none;padding:14px;background:var(--bg);border-top:1px solid var(--border)}
+.help-chapter-body.open{display:block}
+.help-p{font-size:14px;color:var(--text);line-height:1.7;margin-bottom:10px}
+.help-note{font-size:13px;color:var(--text2);font-style:italic;background:var(--bg2);border-left:3px solid var(--accent);padding:8px 12px;border-radius:0 6px 6px 0;margin:8px 0}
+.help-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+.help-table th{background:var(--accent);color:#fff;padding:7px 10px;text-align:left;font-weight:600}
+.help-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.help-table tr:last-child td{border-bottom:none}
+.help-table tr:nth-child(even) td{background:var(--bg2)}
+.help-li{font-size:14px;color:var(--text);line-height:1.7;padding-left:8px;margin-bottom:4px}
+.help-h3{font-size:14px;font-weight:700;color:var(--text);margin:14px 0 6px}
+
 .ct-ok{border-left-color:var(--green)!important}
 .ct-warn{border-left-color:var(--orange)!important;background:color-mix(in srgb,var(--orangebg) 40%,var(--bg2))!important}
 .ct-urgent{border-left-color:var(--red)!important;background:color-mix(in srgb,var(--redbg) 40%,var(--bg2))!important}
@@ -122,6 +142,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:14px 0}
     <button class="tab" onclick="goTab('types',this)">☰ Types</button>
     <button class="tab" onclick="goTab('garages',this)">📍 Garages</button>
     <button class="tab" onclick="goTab('settings',this)">⚙️ Paramètres</button>
+    <button class="tab" onclick="goTab('help',this)">❓ Aide</button>
   </div>
 
   <!-- VEHICULES -->
@@ -230,6 +251,16 @@ hr.div{border:none;border-top:1px solid var(--border);margin:14px 0}
       <div id="imp-msg" style="margin-top:10px;font-size:13px"></div>
     </div>
   </div>
+
+  <!-- AIDE -->
+  <div id="page-help" class="page">
+    <div style="margin-bottom:16px">
+      <div style="font-size:20px;font-weight:700;margin-bottom:4px">❓ Manuel d'utilisation</div>
+      <div style="font-size:13px;color:var(--text2)">Cliquez sur un chapitre pour le déplier</div>
+    </div>
+    <div id="help-chapters"></div>
+  </div>
+
 </div>
 
 <!-- MODALS -->
@@ -622,6 +653,149 @@ function ctStatus(v) {
   return ctNextStatus(latest);
 }
 
+
+// ── AIDE ──
+var helpChapters = [
+  { icon:'🚗', title:'1. Présentation', content:`
+    <p class="help-p">Suivi Véhicules vous permet de gérer l'historique complet de vos véhicules : entretiens périodiques, réparations, contrôles techniques, kilométrage et documents Dropbox.</p>
+    <p class="help-p">Les données sont sauvegardées dans votre navigateur (localStorage). Utilisez l'export JSON pour sauvegarder et l'import JSON pour restaurer ou transférer.</p>
+    <div class="help-note">L'application fonctionne sur PC Windows sans installation. Sur iPhone elle nécessite un hébergement web (GitHub Pages).</div>
+  `},
+  { icon:'🌐', title:'2. Accès et hébergement', content:`
+    <p class="help-h3">Sur PC Windows</p>
+    <p class="help-p">Double-cliquez sur le fichier index.html. Tous les boutons fonctionnent et les données sont sauvegardées dans Chrome ou Edge.</p>
+    <p class="help-h3">Sur iPhone / iPad</p>
+    <p class="help-p">Le fichier doit être hébergé sur un serveur web. Solution recommandée : GitHub Pages (gratuit, sans limite).</p>
+    <ol style="padding-left:20px;font-size:14px;line-height:2">
+      <li>Créez un compte sur github.com</li>
+      <li>Créez un dépôt public</li>
+      <li>Uploadez le fichier renommé index.html</li>
+      <li>Settings → Pages → Branch: main → Save</li>
+      <li>URL : https://votrenom.github.io/nom-du-depot</li>
+    </ol>
+    <div class="help-note">Ajoutez l'URL en favori sur l'écran d'accueil iPhone pour y accéder comme une vraie app.</div>
+  `},
+  { icon:'🗂', title:'3. Navigation', content:`
+    <table class="help-table">
+      <tr><th>Onglet</th><th>Contenu</th></tr>
+      <tr><td>🚗 Véhicules</td><td>Vue d'ensemble avec alertes d'entretien par nom</td></tr>
+      <tr><td>🔧 Entretiens</td><td>Tous les entretiens triés par urgence</td></tr>
+      <tr><td>🔩 Réparations</td><td>Toutes les réparations triées par date</td></tr>
+      <tr><td>☰ Types</td><td>Catalogue des types d'entretien</td></tr>
+      <tr><td>📍 Garages</td><td>Carnet d'adresses des garages</td></tr>
+      <tr><td>⚙️ Paramètres</td><td>Seuil d'alerte, export/import JSON</td></tr>
+    </table>
+  `},
+  { icon:'🚘', title:'4. Gestion des véhicules', content:`
+    <p class="help-h3">Ajouter un véhicule</p>
+    <p class="help-p">Cliquez sur « + Véhicule » en haut à droite. Renseignez l'immatriculation, le modèle, le kilométrage et optionnellement le lien Dropbox de la carte grise.</p>
+    <p class="help-h3">Alertes sur la carte véhicule</p>
+    <table class="help-table">
+      <tr><th>Couleur</th><th>Signification</th></tr>
+      <tr><td>⚠ Rouge</td><td>Entretien en retard ou jamais effectué</td></tr>
+      <tr><td>⏱ Orange</td><td>Entretien à prévoir bientôt</td></tr>
+      <tr><td>✓ Vert</td><td>Tous les entretiens sont à jour</td></tr>
+    </table>
+    <div class="help-note">Le nom précis de l'entretien concerné est affiché sur la carte, pas juste un compteur.</div>
+    <p class="help-h3">Mettre à jour le kilométrage</p>
+    <p class="help-p">Cliquez sur « 📏 Km » dans la fiche détail. Le kilométrage se met aussi à jour automatiquement quand vous enregistrez un entretien ou une réparation avec un km supérieur.</p>
+  `},
+  { icon:'🔧', title:'5. Les entretiens', content:`
+    <p class="help-h3">À planifier / Historique</p>
+    <p class="help-p">Les entretiens sont séparés en deux sections : <strong>À planifier</strong> (échéance à venir, triés par urgence) et <strong>Historique</strong> (réalisés, regroupés par année).</p>
+    <p class="help-h3">Ajouter un entretien</p>
+    <p class="help-p">Cliquez sur « 🔧 + Entretien » dans la fiche véhicule. Choisissez le type, définissez la périodicité (mois et/ou km) propre à ce véhicule, renseignez le dernier entretien effectué.</p>
+    <div class="help-note">La périodicité est pré-remplie automatiquement si le même type a déjà été saisi pour ce véhicule.</div>
+    <p class="help-h3">Marquer comme effectué</p>
+    <p class="help-p">Cliquez sur « ✓ Effectué » sur un entretien à planifier. L'entretien bascule dans l'historique et le prochain est créé automatiquement.</p>
+    <p class="help-h3">Seuil d'alerte orange</p>
+    <p class="help-p">Configurable dans Paramètres (défaut 10%). Exemple : avec 10% et 12 mois d'intervalle, l'alerte orange s'affiche à partir du 11e mois.</p>
+  `},
+  { icon:'🔩', title:'6. Les réparations', content:`
+    <p class="help-p">Les réparations sont des interventions ponctuelles sans récurrence (carrosserie, freins, électrique…). Elles n'génèrent pas d'alerte, juste un historique.</p>
+    <p class="help-h3">Ajouter une réparation</p>
+    <p class="help-p">Cliquez sur « 🔩 + Réparation » dans la fiche véhicule. Renseignez le type, la date, le kilométrage, le garage, le montant, le lien Dropbox de la facture et les notes.</p>
+    <div class="help-note">Le kilométrage est pré-rempli avec le km actuel du véhicule.</div>
+  `},
+  { icon:'🔍', title:'7. Le contrôle technique', content:`
+    <p class="help-p">Chaque véhicule a un historique dédié aux contrôles techniques avec alerte sur la date du prochain CT.</p>
+    <p class="help-h3">Ajouter un CT</p>
+    <p class="help-p">Cliquez sur « + Nouveau CT » dans la fiche véhicule. Collez le lien Dropbox du rapport PDF, ouvrez-le, puis renseignez : date, prochain CT, kilométrage et résultat.</p>
+    <table class="help-table">
+      <tr><th>Résultat</th><th></th></tr>
+      <tr><td>✅ Favorable</td><td>Contrôle réussi</td></tr>
+      <tr><td>⚠️ Défaillance mineure</td><td>Défaut mineur relevé</td></tr>
+      <tr><td>🔴 Défaillance majeure</td><td>Défaut majeur — réparation nécessaire</td></tr>
+      <tr><td>❌ Contre-visite</td><td>Contre-visite requise</td></tr>
+    </table>
+  `},
+  { icon:'📍', title:'8. Garages et types', content:`
+    <p class="help-h3">Types d'entretien (☰ Types)</p>
+    <p class="help-p">Définissez votre catalogue : Vidange, Révision, Courroie… La périodicité est définie par véhicule, pas par type — chaque voiture peut avoir des intervalles différents.</p>
+    <p class="help-h3">Carnet de garages (📍 Garages)</p>
+    <p class="help-p">Créez vos garages avec nom, adresse, téléphone, email et notes. Ils sont réutilisables dans tous les formulaires via un menu déroulant. Vous pouvez créer un garage directement depuis le formulaire d'entretien.</p>
+  `},
+  { icon:'💾', title:'9. Export et import des données', content:`
+    <p class="help-h3">Export JSON (⚙️ Paramètres)</p>
+    <p class="help-p">Saisissez un nom de fichier et cliquez « ⬇ Télécharger ». Toutes vos données sont exportées dans un fichier .json.</p>
+    <div class="help-note">Effectuez un export régulier comme sauvegarde. Les données peuvent être perdues si vous videz le cache du navigateur.</div>
+    <p class="help-h3">Import JSON</p>
+    <p class="help-p">Cliquez « 📂 Choisir un fichier… » et sélectionnez votre fichier .json. Un résumé s'affiche avant confirmation.</p>
+    <p class="help-h3">Synchronisation PC ↔ iPhone</p>
+    <ol style="padding-left:20px;font-size:14px;line-height:2">
+      <li>Exportez sur l'appareil source</li>
+      <li>Transférez via email ou Dropbox</li>
+      <li>Importez sur l'appareil cible</li>
+    </ol>
+  `},
+  { icon:'📤', title:'10. Export du carnet', content:`
+    <p class="help-p">Le bouton « 📤 Exporter » génère un carnet complet en 3 formats :</p>
+    <table class="help-table">
+      <tr><th>Format</th><th>Contenu</th></tr>
+      <tr><td>📕 PDF</td><td>Document mis en page avec tableaux colorés (entretiens, réparations, CT)</td></tr>
+      <tr><td>📘 Word</td><td>Document .doc avec liens Dropbox cliquables</td></tr>
+      <tr><td>📗 Excel</td><td>4 onglets : Résumé, Entretiens, Réparations, Contrôles techniques</td></tr>
+    </table>
+    <div class="help-note">Si le PDF ne se génère pas, attendez 3 secondes que la librairie se charge et réessayez.</div>
+  `},
+  { icon:'❓', title:'11. Questions fréquentes', content:`
+    <p class="help-h3">Les boutons ne fonctionnent pas sur iPhone</p>
+    <p class="help-p">L'application doit être hébergée sur un serveur web (GitHub Pages). Elle ne fonctionne pas depuis l'app Fichiers d'iOS.</p>
+    <p class="help-h3">Mes données ont disparu</p>
+    <p class="help-p">Les données sont dans le cache du navigateur. Si vous videz le cache, elles sont perdues. Faites des exports JSON réguliers.</p>
+    <p class="help-h3">Le PDF ne fonctionne pas sur Windows</p>
+    <p class="help-p">Attendez 3 secondes après le chargement de la page et réessayez. Les librairies PDF/Excel nécessitent une connexion internet.</p>
+    <p class="help-h3">Comment mettre à jour l'app sur GitHub</p>
+    <p class="help-p">Renommez votre fichier en index.html, uploadez-le sur GitHub (Add file → Upload files), supprimez l'ancien, puis Commit changes. Mise à jour visible en 1-2 minutes.</p>
+    <p class="help-h3">Ajouter l'app à l'écran d'accueil iPhone</p>
+    <p class="help-p">Ouvrez l'URL dans Safari → icône de partage → « Sur l'écran d'accueil ».</p>
+  `}
+];
+
+function renderHelp() {
+  var container = document.getElementById('help-chapters');
+  if (!container || container.children.length > 0) return;
+  helpChapters.forEach(function(ch, i) {
+    var div = document.createElement('div');
+    div.className = 'help-chapter';
+    var hdr = document.createElement('div');
+    hdr.className = 'help-chapter-header';
+    hdr.innerHTML = '<span class="help-chapter-icon">'+ch.icon+'</span>' +
+      '<span class="help-chapter-title">'+ch.title+'</span>' +
+      '<span class="help-chapter-arrow" id="help-arr-'+i+'">▼</span>';
+    var body = document.createElement('div');
+    body.className = 'help-chapter-body';
+    body.id = 'help-body-'+i;
+    body.innerHTML = ch.content;
+    hdr.onclick = function() {
+      var isOpen = body.classList.toggle('open');
+      document.getElementById('help-arr-'+i).classList.toggle('open', isOpen);
+    };
+    div.appendChild(hdr);
+    div.appendChild(body);
+    container.appendChild(div);
+  });
+}
 function boot(){
   try{var v=lsGet('sv-v');if(v)D.vehicles=JSON.parse(v);}catch(e){}
   try{var t=lsGet('sv-t');if(t)D.types=JSON.parse(t);}catch(e){}
@@ -647,6 +821,7 @@ function goTab(tab,btn){
   document.getElementById('page-'+tab).classList.add('act');
   if(tab==='maint')renderAllMaint();
   if(tab==='repairs')renderAllRepairs();
+  if(tab==='help')renderHelp();
 }
 
 function uid(){return 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2);}
